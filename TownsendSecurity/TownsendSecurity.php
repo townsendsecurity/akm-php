@@ -2,11 +2,11 @@
 
 namespace TownsendSecurity;
 
-require_once __DIR__ . '/lib/AuthFile.php';
-require_once __DIR__ . '/lib/EncryptionService.php';
-require_once __DIR__ . '/lib/KeyServer.php';
-require_once __DIR__ . '/lib/KeyService.php';
-
+spl_autoload_register(function($class) {
+  // `$class' comes in as fully qualified with namespaces
+  $parts = explode('\\', $class);
+  require_once __DIR__ . '/lib/' . end($parts) . '.php';
+});
 
 abstract class Service {
 
