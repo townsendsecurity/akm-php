@@ -4,6 +4,21 @@ namespace TownsendSecurity;
 
 use TownsendSecurity\AuthFile;
 
+function rand_string($nchars = 16) {
+  $allowed = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+
+  $len = strlen($allowed) - 1;
+
+  $s = '';
+
+  for ($i = 0; $i != $len; ++$i) {
+    $index = rand(0, $len);
+    $s .= $allowed[$index];
+  }
+
+  return $s;
+}
+
 class KeyServer {
 
   protected $key_server;
@@ -57,6 +72,68 @@ class KeyServer {
 
     if (!empty($key)) {
       return $key;
+    }
+  }
+
+  public function encrypt($connection, $text = '', $key = '', $op = 'encrypt', $options = array()) {
+    if ($op == 'encrypt') {
+      // key length = 40 (left justify pad on right)
+      // instance = 24 (leave blank or instance got back)
+
+      // generate random iv to use w/ encryption
+      $iv = rand_string(16);
+      $textcount = sprintf('%05d', strlen($text));
+      if (floor($textcount / 16) != $textcount / 16) {
+        $padlen = 16 * ceil($textcount / 16);
+        $text = sprintf('% -' . $padlen . 's', $text);
+        $textcount = sprintf('%05d', strlen($text));
+      }
+      $key = sprintf('% -64s', $key);
+      $request = sprintf('000982019YNB16' . $textcount . 'YNYY' . $iv . '' . $key . '' . '' . $text . '');
+      fwrite($connection, $request);
+      $len = fread($connection, 5);
+      if ($len) {
+        $return = fread($connection, $len + (3 * $textcount));
+        if ($return) {
+          $inst = substr($return, 15, 24);
+          $coded = substr($return, 39);
+          $value = $iv . $inst . $coded;
+        }
+      }
+      else {
+        return '';
+      }
+      fclose($connection);
+      return $value;
+    }
+    else {
+      $iv = substr($text, 0, 16);
+      $inst = substr($text, 16, 24);
+      $coded = substr($text, 40);
+      $textcount = sprintf('%05d', strlen($coded));
+      $keypad = sprintf('% -40s', $key);
+      $key = $keypad . $inst;
+      if (floor($textcount / 16) != $textcount / 16) {
+        $pandlen = 16 * ceil($textcount / 16);
+        $coded = sprintf('% -' . $padlen . 's', $coded);
+        $textcount = sprintf('%05d', strlen($coded));
+      }
+      $decrypt_header = '001012021YNB16' . $textcount . 'BINYNYY' . $iv . $key;
+      $decrypt = sprintf($decrypt_header . $coded);
+      fwrite($connection, $decrypt);
+      $len = fread($connection, 5);
+      if ($len) {
+        $rsp = fread($connection, $len + $textcount);
+        if ($rsp) {
+          $value = substr($rsp, 39);
+          $value = rtrim($value);
+        }
+      }
+      else {
+        return '';
+      }
+      fclose($connection);
+      return $value;
     }
   }
 

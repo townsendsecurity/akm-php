@@ -18,6 +18,7 @@ $key_service->addKeyServer($server, $port, $ca_cert_file, $client_cert_key_file)
 
 $key = $key_service->getSymmetricKey($key_name, '', $format);
 
+print 'key';
 print_r($key);
 
 print '</pre>';
