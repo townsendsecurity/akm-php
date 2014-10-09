@@ -90,14 +90,17 @@ class KeyServer {
       }
       $key = sprintf('% -64s', $key);
       $request = sprintf('000982019YNB16' . $textcount . 'YNYY' . $iv . '' . $key . '' . '' . $text . '');
+      print "writing: $request\n";
       fwrite($connection, $request);
       $len = fread($connection, 5);
+      print "return with len: $len\n";
       if ($len) {
         $return = fread($connection, $len + (3 * $textcount));
         if ($return) {
           $inst = substr($return, 15, 24);
           $coded = substr($return, 39);
           $value = $iv . $inst . $coded;
+          print "and value: $value\n";
         }
       }
       else {
