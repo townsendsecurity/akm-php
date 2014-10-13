@@ -21,11 +21,10 @@ class EncryptionService extends Service {
       $connection = $server->connect();
       if (isset($connection)) {
         $data = $server->encrypt($connection, $text, $key, $op, $options);
+        if (!empty($data)) {
+          return $data;
+        }
       }
-    }
-
-    if (!empty($data)) {
-      return $data;
     }
   }
 
