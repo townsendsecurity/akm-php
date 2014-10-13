@@ -21,7 +21,7 @@ $key_service->addKeyServer($failover, $port, $ca_cert_file, $client_cert_key_fil
 
 $key = $key_service->getSymmetricKey($key_name, '', $format);
 
-print "key\n";
+print "key:\n";
 print_r($key);
 
 print "\n";
@@ -33,6 +33,7 @@ $data = 'secret';
 
 $r = $encrypt_service->encrypt($data, $key_name);
 
+print "encrypted 'secret':\n";
 print_r($r);
 
 print '</pre>';
