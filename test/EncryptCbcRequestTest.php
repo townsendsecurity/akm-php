@@ -3,10 +3,10 @@
 namespace TownsendSecurity\Test;
 
 use TownsendSecurity\DecryptCbcRequest;
-use TownsendSecurity\EncryptCbCRequest;
+use TownsendSecurity\EncryptCbcRequest;
 use TownsendSecurity\PKCS7Padder;
 
-class EncryptCbCRequestTest extends AkmTestCase
+class EncryptCbcRequestTest extends AkmTestCase
 {
     /** @var TownsendSecurity\PaddingInterface */
     protected $p;
@@ -24,7 +24,7 @@ class EncryptCbCRequestTest extends AkmTestCase
     public function testEncryptionRoundTrip($text)
     {
         $iv = str_repeat('iv', 8);
-        $req = new EncryptCbCRequest(
+        $req = new EncryptCbcRequest(
             $this->p,
             $iv,
             $this->keyname,
@@ -50,7 +50,7 @@ class EncryptCbCRequestTest extends AkmTestCase
 
     public function roundTripText()
     {
-        $chunk_len = EncryptCbCRequest::CHUNK_LEN;
+        $chunk_len = EncryptCbcRequest::CHUNK_LEN;
         return [
             [str_repeat('a', 15)],
             [str_repeat('a', $chunk_len + $chunk_len / 2)],

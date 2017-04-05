@@ -5,7 +5,7 @@ namespace TownsendSecurity;
 use InvalidArgumentException;
 use RuntimeException;
 
-class EncryptCbCRequest implements RequestInterface
+class EncryptCbcRequest implements RequestInterface
 {
     /** @const string */
     const ID = '2019';
@@ -138,6 +138,6 @@ class EncryptCbCRequest implements RequestInterface
             $cipher_text .= fread($stream, $cipher_text_length);
         }
 
-        return new EncryptCbCResponse($instance, $cipher_text);
+        return new EncryptCbcResponse($instance, $cipher_text);
     }
 }

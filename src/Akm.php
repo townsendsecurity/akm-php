@@ -69,7 +69,7 @@ class Akm implements AkmInterface
     public function encrypt($text, $key_name)
     {
         $iv = openssl_random_pseudo_bytes(16);
-        $req = new EncryptCbCRequest(
+        $req = new EncryptCbcRequest(
             new PKCS7Padder(),
             $iv,
             $key_name,

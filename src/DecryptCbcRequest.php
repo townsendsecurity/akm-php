@@ -150,6 +150,6 @@ class DecryptCbcRequest implements RequestInterface
 
         $plain_text = $this->padder->unpad($plain_text);
 
-        return new DecryptCbCResponse($instance, $plain_text);
+        return new DecryptCbcResponse($instance, $plain_text);
     }
 }

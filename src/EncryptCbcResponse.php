@@ -2,7 +2,7 @@
 
 namespace TownsendSecurity;
 
-class EncryptCbCResponse
+class EncryptCbcResponse
 {
     /** @var string */
     protected $instance;
