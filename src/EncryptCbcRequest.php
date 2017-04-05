@@ -141,4 +141,3 @@ class EncryptCbCRequest implements RequestInterface
         return new EncryptCbCResponse($instance, $cipher_text);
     }
 }
-

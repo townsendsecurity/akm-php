@@ -153,4 +153,3 @@ class DecryptCbcRequest implements RequestInterface
         return new DecryptCbCResponse($instance, $plain_text);
     }
 }
-

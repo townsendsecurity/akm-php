@@ -90,4 +90,3 @@ class GetSymmetricKeyResponse
         return substr($this->keyValue, 0, self::$keySizeLookup[$format][$size]);
     }
 }
-

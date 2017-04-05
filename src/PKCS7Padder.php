@@ -42,4 +42,3 @@ class PKCS7Padder implements PaddingInterface
         return substr($text, 0, -$n);
     }
 }
-

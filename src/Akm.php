@@ -114,4 +114,3 @@ class Akm implements AkmInterface
         return $this->send($req)->getPlainText();
     }
 }
-

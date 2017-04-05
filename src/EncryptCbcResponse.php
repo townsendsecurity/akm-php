@@ -10,7 +10,7 @@ class EncryptCbCResponse
     /** @var string */
     protected $cipherText;
 
-    public function __construct ($instance, $cipher_text)
+    public function __construct($instance, $cipher_text)
     {
         $this->instance = $instance;
         $this->cipherText = $cipher_text;
@@ -26,4 +26,3 @@ class EncryptCbCResponse
         return $this->cipherText;
     }
 }
-

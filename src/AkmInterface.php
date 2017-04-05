@@ -20,4 +20,3 @@ interface AkmInterface
      */
     public function send(RequestInterface $request);
 }
-

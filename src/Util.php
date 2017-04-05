@@ -25,4 +25,3 @@ class Util
         return DateTime::createFromFormat('Ymd', $data);
     }
 }
-

@@ -18,4 +18,3 @@ interface RequestInterface
      */
     public function send($stream);
 }
-

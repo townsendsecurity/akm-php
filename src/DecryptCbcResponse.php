@@ -10,7 +10,7 @@ class DecryptCbCResponse
     /** @var string */
     protected $cipherText;
 
-    public function __construct ($instance, $plain_text)
+    public function __construct($instance, $plain_text)
     {
         $this->instance = $instance;
         $this->plainText = $plain_text;
@@ -26,4 +26,3 @@ class DecryptCbCResponse
         return $this->plainText;
     }
 }
-

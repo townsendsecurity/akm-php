@@ -23,4 +23,3 @@ interface PaddingInterface
      */
     public function unpad($text);
 }
-
