@@ -56,5 +56,15 @@ class EncryptCbCRequestTest extends AkmTestCase
             [str_repeat('a', $chunk_len + $chunk_len / 2)],
         ];
     }
+
+    public function testConvenienceFunction()
+    {
+        $text = str_repeat('a', 7);
+        $ciphertext = $this->akm->encrypt($text, $this->keyname);
+        $this->assertEquals(
+            $this->akm->decrypt($ciphertext),
+            $text
+        );
+    }
 }
 

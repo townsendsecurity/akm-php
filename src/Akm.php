@@ -2,6 +2,7 @@
 
 namespace TownsendSecurity;
 
+use InvalidArgumentException;
 use RuntimeException;
 
 class Akm implements AkmInterface
@@ -54,6 +55,63 @@ class Akm implements AkmInterface
     {
         $req = new GetSymmetricKeyRequest($key_name, $instance, $key_format);
         return $this->send($req)->getKeyValueRaw();
+    }
+
+    /**
+     * Encrypts the given text, the returned string contains enough
+     * information for a complete decrypt.
+     *
+     * @param string $text
+     * @param string $key_name
+     *
+     * @returns string
+     */
+    public function encrypt($text, $key_name)
+    {
+        $iv = openssl_random_pseudo_bytes(16);
+        $req = new EncryptCbCRequest(
+            new PKCS7Padder(),
+            $iv,
+            $key_name,
+            '',
+            $text
+        );
+        $resp = $this->send($req);
+
+        $iv = base64_encode($iv);
+        $inst = $resp->getInstance();
+        $ciphertext = base64_encode($resp->getCipherText());
+
+        return $iv . '$' . $inst . '$' . $ciphertext;
+    }
+
+    /**
+     * Decrypts data encrypted with the convenience function.
+     *
+     * @param string $data
+     *
+     * @returns string
+     */
+    public function decrypt($data)
+    {
+        $parts = explode('$', $data);
+        if (count($parts) !== 3) {
+            throw new InvalidArgumentException('Malformed ciphertext');
+        }
+
+        $iv = base64_decode($parts[0]);
+        $inst = $parts[1];
+        $ciphertext = base64_decode($parts[2]);
+
+        $req = new DecryptCbcRequest(
+            new PKCS7Padder(),
+            $iv,
+            '',
+            $inst,
+            $ciphertext
+        );
+
+        return $this->send($req)->getPlainText();
     }
 }
 
