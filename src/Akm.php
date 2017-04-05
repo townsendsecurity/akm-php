@@ -40,5 +40,20 @@ class Akm implements AkmInterface
 
         return $request->send($stream);
     }
+
+    /**
+     * Convenience method to get a key value.
+     *
+     * @param string $key_name
+     * @param string $instance
+     * @param string $key_format
+     *
+     * @return string
+     */
+    public function getKeyValue($key_name, $instance = '', $key_format = 'BIN')
+    {
+        $req = new GetSymmetricKeyRequest($key_name, $instance, $key_format);
+        return $this->send($req)->getKeyValueRaw();
+    }
 }
 
