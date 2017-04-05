@@ -1,0 +1,6 @@
+#!/bin/bash
+# ex: ts=4 sts=4 sw=4 et:
+
+find src -name '*.php' -print0 |
+xargs -0 ./vendor/bin/phpcs --standard=PSR2
+
