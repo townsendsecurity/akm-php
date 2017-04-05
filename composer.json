@@ -1,0 +1,24 @@
+{
+    "name": "townsend/akm",
+    "description": "Connection library for the Townsend AKM.",
+    "authors": [
+        {
+            "name": "Tynor Fujimoto",
+            "email": "tynor@lockr.io"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "TownsendSecurity\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "TownsendSecurity\\Test\\": "test/"
+        }
+    },
+    "require": {},
+    "require-dev": {
+        "phpunit/phpunit": "^6.0"
+    }
+}
