@@ -70,7 +70,6 @@ class Akm implements AkmInterface
     {
         $iv = openssl_random_pseudo_bytes(16);
         $req = new EncryptCbcRequest(
-            new PKCS7Padder(),
             $iv,
             $key_name,
             '',
@@ -104,7 +103,6 @@ class Akm implements AkmInterface
         $ciphertext = base64_decode($parts[2]);
 
         $req = new DecryptCbcRequest(
-            new PKCS7Padder(),
             $iv,
             '',
             $inst,

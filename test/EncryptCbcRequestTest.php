@@ -4,20 +4,9 @@ namespace TownsendSecurity\Test;
 
 use TownsendSecurity\DecryptCbcRequest;
 use TownsendSecurity\EncryptCbcRequest;
-use TownsendSecurity\PKCS7Padder;
 
 class EncryptCbcRequestTest extends AkmTestCase
 {
-    /** @var TownsendSecurity\PaddingInterface */
-    protected $p;
-
-    public function setUp()
-    {
-        parent::setUp();
-
-        $this->p = new PKCS7Padder();
-    }
-
     /**
      * @dataProvider roundTripText
      */
@@ -25,7 +14,6 @@ class EncryptCbcRequestTest extends AkmTestCase
     {
         $iv = str_repeat('iv', 8);
         $req = new EncryptCbcRequest(
-            $this->p,
             $iv,
             $this->keyname,
             '',
@@ -34,7 +22,6 @@ class EncryptCbcRequestTest extends AkmTestCase
         $resp = $this->akm->send($req);
 
         $req = new DecryptCbcRequest(
-            $this->p,
             $iv,
             $this->keyname,
             $resp->getInstance(),

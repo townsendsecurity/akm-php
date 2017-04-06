@@ -19,9 +19,6 @@ class EncryptCbcRequest implements RequestInterface
     /** @const int */
     const CHUNK_LEN = 8080;
 
-    /** @var TownsendSecurity\PaddingInterface */
-    protected $padder;
-
     /** @var string */
     protected $iv;
 
@@ -38,7 +35,6 @@ class EncryptCbcRequest implements RequestInterface
     protected $cipherTextFormat;
 
     public function __construct(
-        PaddingInterface $padder,
         $iv,
         $key_name,
         $instance,
@@ -64,7 +60,6 @@ class EncryptCbcRequest implements RequestInterface
             );
         }
 
-        $this->padder = $padder;
         $this->iv = $iv;
         $this->keyName = $key_name;
         $this->instance = $instance;
@@ -85,7 +80,7 @@ class EncryptCbcRequest implements RequestInterface
      */
     public function send($stream)
     {
-        $data = $this->padder->pad($this->data);
+        $data = (new PKCS7Padder())->pad($this->data);
         $chunks = str_split($data, self::CHUNK_LEN);
 
         $chunk = array_shift($chunks);

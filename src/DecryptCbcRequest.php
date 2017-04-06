@@ -19,9 +19,6 @@ class DecryptCbcRequest implements RequestInterface
     /** @const int */
     const CHUNK_LEN = 8080;
 
-    /** @var TownsendSecurity\PaddingInterface */
-    protected $padder;
-
     /** @var string */
     protected $iv;
 
@@ -41,7 +38,6 @@ class DecryptCbcRequest implements RequestInterface
     protected $plainTextFormat;
 
     public function __construct(
-        PaddingInterface $padder,
         $iv,
         $key_name,
         $instance,
@@ -73,7 +69,6 @@ class DecryptCbcRequest implements RequestInterface
             );
         }
 
-        $this->padder = $padder;
         $this->iv = $iv;
         $this->keyName = $key_name;
         $this->instance = $instance;
@@ -148,7 +143,7 @@ class DecryptCbcRequest implements RequestInterface
             $plain_text .= fread($stream, $plain_text_length);
         }
 
-        $plain_text = $this->padder->unpad($plain_text);
+        $plain_text = (new PKCS7Padder())->unpad($plain_text);
 
         return new DecryptCbcResponse($instance, $plain_text);
     }
