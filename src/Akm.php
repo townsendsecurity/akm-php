@@ -8,7 +8,7 @@ use RuntimeException;
 class Akm implements AkmInterface
 {
     /** @var array */
-    protected $servers = array();
+    protected $servers = [];
 
     /**
      * {@inheritdoc}

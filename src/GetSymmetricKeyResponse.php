@@ -7,23 +7,23 @@ use RuntimeException;
 class GetSymmetricKeyResponse
 {
     /** @var array */
-    protected static $keySizeLookup = array(
-        'BIN' => array(
+    protected static $keySizeLookup = [
+        'BIN' => [
             128 => 16,
             192 => 24,
             256 => 32,
-        ),
-        'B16' => array(
+        ],
+        'B16' => [
             128 => 32,
             192 => 48,
             256 => 64,
-        ),
-        'B64' => array(
+        ],
+        'B64' => [
             128 => 24,
             192 => 32,
             256 => 44,
-        ),
-    );
+        ],
+    ];
 
     /** @var string */
     protected $keyName;

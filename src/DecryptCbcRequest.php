@@ -61,7 +61,7 @@ class DecryptCbcRequest implements RequestInterface
             );
         }
 
-        $valid_formats = array('BIN', 'B16', 'B64');
+        $valid_formats = ['BIN', 'B16', 'B64'];
         if (!in_array($cipher_text_format, $valid_formats)) {
             throw new InvalidArgumentException(
                 '"$cipher_text_format" must be one of "BIN", "B16", or "B64"'

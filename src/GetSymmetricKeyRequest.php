@@ -49,7 +49,7 @@ class GetSymmetricKeyRequest implements RequestInterface
             );
         }
 
-        $valid_formats = array('BIN', 'B16', 'B64');
+        $valid_formats = ['BIN', 'B16', 'B64'];
         if (!in_array($key_format, $valid_formats)) {
             throw new InvalidArgumentException(
                 '"$key_format" must be one of "BIN", "B16", or "B64"'

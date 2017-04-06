@@ -38,17 +38,17 @@ class KeyServer
         $host,
         $local_cert,
         $cafile,
-        array $ports = array()
+        array $ports = []
     ) {
         $this->host = $host;
         $this->name = $name;
-        $this->ctx = stream_context_create(array(
-            'ssl' => array(
+        $this->ctx = stream_context_create([
+            'ssl' => [
                 'peer_name' => $name,
                 'cafile' => $cafile,
                 'local_cert' => $local_cert,
-            ),
-        ));
+            ],
+        ]);
         if (isset($ports['user'])) {
             $this->userPort = $ports['user'];
         }
