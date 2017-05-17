@@ -120,7 +120,7 @@ class DecryptCbcRequest implements RequestInterface
 
         $status = substr($hdr, 9, 4);
         if ($status !== '0000') {
-            throw new RuntimeException("Got status: {$status}");
+            throw new RuntimeException("Got status: {$status}", (int) $status);
         }
 
         $end_of_response = $hdr[13];
@@ -134,7 +134,10 @@ class DecryptCbcRequest implements RequestInterface
 
             $status = substr($hdr, 0, 4);
             if ($status !== '0000') {
-                throw new RuntimeException("Got status: {$status}");
+                throw new RuntimeException(
+                    "Got status: {$status}",
+                    (int) $status
+                );
             }
 
             $end_of_response = $hdr[4];

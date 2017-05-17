@@ -80,7 +80,7 @@ class GetSymmetricKeyRequest implements RequestInterface
 
         $status = substr($data, 9, 4);
         if ($status !== '0000') {
-            throw new RuntimeException("Got status: {$status}");
+            throw new RuntimeException("Got status: {$status}", (int) $status);
         }
 
         return new GetSymmetricKeyResponse(
