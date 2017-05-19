@@ -76,18 +76,6 @@ class Akm implements AkmInterface
             : $this->encryptShort($text, $key_name);
     }
 
-    protected function encryptLong($text, $key_name)
-    {
-        $key = DefuseKey::createNewRandomKey();
-        $key_value = $key->saveToAsciiSafeString();
-        $key_data = $this->encryptShort($key_value, $key_name);
-
-        $ciphertext = DefuseCrypto::encrypt($text, $key, true);
-        $ciphertext = base64_encode($ciphertext);
-
-        return "L\n" . $key_data . "\n" . $ciphertext;
-    }
-
     protected function encryptShort($text, $key_name)
     {
         $iv = openssl_random_pseudo_bytes(16);
@@ -104,6 +92,18 @@ class Akm implements AkmInterface
         $ciphertext = base64_encode($resp->getCipherText());
 
         return 'S$' . $iv . '$' . $inst . '$' . $ciphertext;
+    }
+
+    protected function encryptLong($text, $key_name)
+    {
+        $key = DefuseKey::createNewRandomKey();
+        $key_value = $key->saveToAsciiSafeString();
+        $key_data = $this->encryptShort($key_value, $key_name);
+
+        $ciphertext = DefuseCrypto::encrypt($text, $key, true);
+        $ciphertext = base64_encode($ciphertext);
+
+        return "L\n" . substr($key_data, 2) . "\n" . $ciphertext;
     }
 
     /**
@@ -148,7 +148,7 @@ class Akm implements AkmInterface
             throw new InvalidArgumentException('Malformed ciphertext');
         }
 
-        $key_value = $this->decryptShort(substr($parts[0], 2));
+        $key_value = $this->decryptShort($parts[0]);
         $key = DefuseKey::loadFromAsciiSafeString($key_value, true);
 
         $ciphertext = base64_decode($parts[1]);
