@@ -11,10 +11,7 @@ class EncryptCbcRequest implements RequestInterface
     const ID = '2019';
 
     /** @const string */
-    const FMT = 'YN%s%05d%sN%sY%s%-40s%-24s';
-
-    /** @const string */
-    const FMT_CONT = '%s%05dN%s';
+    const FMT = 'YN%s%05dYNYY%-16s%-40s%-24s';
 
     /** @const int */
     const CHUNK_LEN = 8080;
@@ -35,12 +32,18 @@ class EncryptCbcRequest implements RequestInterface
     protected $cipherTextFormat;
 
     public function __construct(
+        $data,
         $iv,
         $key_name,
         $instance,
-        $data,
         $cipher_text_format = 'BIN'
     ) {
+        if (strlen($data) > self::CHUNK_LEN) {
+            throw new InvalidArgumentException(
+                '"$data" must fit into one chunk of ' . self::CHUNK_LEN . ' bytes'
+            );
+        }
+
         if (strlen($key_name) > 40) {
             throw new InvalidArgumentException(
                 '"$key_name" must be 40 characters or fewer'
@@ -81,30 +84,16 @@ class EncryptCbcRequest implements RequestInterface
     public function send($stream)
     {
         $data = (new PKCS7Padder())->pad($this->data);
-        $chunks = str_split($data, self::CHUNK_LEN);
 
-        $chunk = array_shift($chunks);
         $hdr = '00098' . self::ID . sprintf(
             self::FMT,
             $this->cipherTextFormat,
-            strlen($chunk),
-            !$chunks ? 'Y' : 'N',
-            !$chunks ? 'Y' : 'N',
+            strlen($data),
             $this->iv,
             $this->keyName,
             $this->instance
         );
-        Util::fwriteAll($stream, $hdr . $chunk);
-
-        while ($chunk = array_shift($chunks)) {
-            $hdr = sprintf(
-                self::FMT_CONT,
-                !$chunks ? 'Y' : 'N',
-                strlen($chunk),
-                !$chunks ? 'Y' : 'N'
-            );
-            Util::fwriteAll($stream, $hdr . $chunk);
-        }
+        Util::fwriteAll($stream, $hdr . $data);
 
         $hdr = fread($stream, 44);
 
@@ -113,28 +102,10 @@ class EncryptCbcRequest implements RequestInterface
             throw new RuntimeException("Got status: {$status}", (int) $status);
         }
 
-        $end_of_response = $hdr[13];
         $cipher_text_length = (int) substr($hdr, 15, 5);
         $instance = substr($hdr, 20, 24);
 
         $cipher_text = fread($stream, $cipher_text_length);
-
-        while ($end_of_response !== 'Y') {
-            $hdr = fread($stream, 11);
-
-            $status = substr($hdr, 0, 4);
-            if ($status !== '0000') {
-                throw new RuntimeException(
-                    "Got status: {$status}",
-                    (int) $status
-                );
-            }
-
-            $end_of_response = $hdr[4];
-            $cipher_text_length = (int) substr($hdr, 6, 5);
-
-            $cipher_text .= fread($stream, $cipher_text_length);
-        }
 
         return new EncryptCbcResponse($instance, $cipher_text);
     }

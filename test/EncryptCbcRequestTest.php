@@ -7,25 +7,24 @@ use TownsendSecurity\EncryptCbcRequest;
 
 class EncryptCbcRequestTest extends AkmTestCase
 {
-    /**
-     * @dataProvider roundTripText
-     */
-    public function testEncryptionRoundTrip($text)
+    public function testEncryptionRoundTrip()
     {
+        $text = str_repeat('a', 32);
+
         $iv = str_repeat('iv', 8);
         $req = new EncryptCbcRequest(
+            $text,
             $iv,
             $this->keyname,
-            '',
-            $text
+            ''
         );
         $resp = $this->akm->send($req);
 
         $req = new DecryptCbcRequest(
+            $resp->getCipherText(),
             $iv,
-            $this->keyname,
-            $resp->getInstance(),
-            $resp->getCipherText()
+            '',
+            $resp->getInstance()
         );
         $resp = $this->akm->send($req);
 
@@ -33,15 +32,6 @@ class EncryptCbcRequestTest extends AkmTestCase
             $resp->getPlainText(),
             $text
         );
-    }
-
-    public function roundTripText()
-    {
-        $chunk_len = EncryptCbcRequest::CHUNK_LEN;
-        return [
-            [str_repeat('a', 15)],
-            [str_repeat('a', $chunk_len + $chunk_len / 2)],
-        ];
     }
 
     public function testConvenienceFunction()

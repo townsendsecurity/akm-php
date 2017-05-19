@@ -70,10 +70,10 @@ class Akm implements AkmInterface
     {
         $iv = openssl_random_pseudo_bytes(16);
         $req = new EncryptCbcRequest(
+            $text,
             $iv,
             $key_name,
-            '',
-            $text
+            ''
         );
         $resp = $this->send($req);
 
@@ -103,10 +103,10 @@ class Akm implements AkmInterface
         $ciphertext = base64_decode($parts[2]);
 
         $req = new DecryptCbcRequest(
+            $ciphertext,
             $iv,
             '',
-            $inst,
-            $ciphertext
+            $inst
         );
 
         return $this->send($req)->getPlainText();

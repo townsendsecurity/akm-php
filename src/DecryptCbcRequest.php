@@ -11,10 +11,7 @@ class DecryptCbcRequest implements RequestInterface
     const ID = '2021';
 
     /** @const string */
-    const FMT = 'YN%s%05d%s%sN%sY%s%-40s%-24s';
-
-    /** @const string */
-    const FMT_CONT = '%05d%sN%s';
+    const FMT = 'YN%s%05d%sYNYY%-16s%-40s%-24s';
 
     /** @const int */
     const CHUNK_LEN = 8080;
@@ -38,13 +35,19 @@ class DecryptCbcRequest implements RequestInterface
     protected $plainTextFormat;
 
     public function __construct(
+        $data,
         $iv,
         $key_name,
         $instance,
-        $data,
         $cipher_text_format = 'BIN',
         $plain_text_format = 'BIN'
     ) {
+        if (strlen($data) > self::CHUNK_LEN) {
+            throw new InvalidArgumentException(
+                '"$data" must fit into one chunk of ' . self::CHUNK_LEN . ' bytes'
+            );
+        }
+
         if (strlen($key_name) > 40) {
             throw new InvalidArgumentException(
                 '"$key_name" must be 40 characters or fewer'
@@ -90,31 +93,16 @@ class DecryptCbcRequest implements RequestInterface
      */
     public function send($stream)
     {
-        $chunks = str_split($this->data, self::CHUNK_LEN);
-
-        $chunk = array_shift($chunks);
         $hdr = '00101' . self::ID . sprintf(
             self::FMT,
             $this->cipherTextFormat,
-            strlen($chunk),
+            strlen($this->data),
             $this->plainTextFormat,
-            !$chunks ? 'Y' : 'N',
-            !$chunks ? 'Y' : 'N',
             $this->iv,
             $this->keyName,
             $this->instance
         );
-        Util::fwriteAll($stream, $hdr . $chunk);
-
-        while ($chunk = array_shift($chunks)) {
-            $hdr = sprintf(
-                self::FMT_CONT,
-                strlen($chunk),
-                !$chunks ? 'Y' : 'N',
-                !$chunks ? 'Y' : 'N'
-            );
-            Util::fwriteAll($stream, $hdr . $chunk);
-        }
+        Util::fwriteAll($stream, $hdr . $this->data);
 
         $hdr = fread($stream, 44);
 
@@ -123,28 +111,10 @@ class DecryptCbcRequest implements RequestInterface
             throw new RuntimeException("Got status: {$status}", (int) $status);
         }
 
-        $end_of_response = $hdr[13];
         $plain_text_length = (int) substr($hdr, 15, 5);
         $instance = substr($hdr, 20, 24);
 
         $plain_text = fread($stream, $plain_text_length);
-
-        while ($end_of_response !== 'Y') {
-            $hdr = fread($stream, 11);
-
-            $status = substr($hdr, 0, 4);
-            if ($status !== '0000') {
-                throw new RuntimeException(
-                    "Got status: {$status}",
-                    (int) $status
-                );
-            }
-
-            $end_of_response = $hdr[4];
-            $plain_text_length = (int) substr($hdr, 6, 5);
-
-            $plain_text .= fread($stream, $plain_text_length);
-        }
 
         $plain_text = (new PKCS7Padder())->unpad($plain_text);
 
