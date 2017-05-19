@@ -5,6 +5,9 @@ namespace TownsendSecurity;
 use InvalidArgumentException;
 use RuntimeException;
 
+use Defuse\Crypto\Crypto as DefuseCrypto;
+use Defuse\Crypto\Key as DefuseKey;
+
 class Akm implements AkmInterface
 {
     /** @var array */
@@ -68,6 +71,25 @@ class Akm implements AkmInterface
      */
     public function encrypt($text, $key_name)
     {
+        return strlen($text) > EncryptCbcRequest::CHUNK_LEN
+            ? $this->encryptLong($text, $key_name)
+            : $this->encryptShort($text, $key_name);
+    }
+
+    protected function encryptLong($text, $key_name)
+    {
+        $key = DefuseKey::createNewRandomKey();
+        $key_value = $key->saveToAsciiSafeString();
+        $key_data = $this->encryptShort($key_value, $key_name);
+
+        $ciphertext = DefuseCrypto::encrypt($text, $key, true);
+        $ciphertext = base64_encode($ciphertext);
+
+        return "L\n" . $key_data . "\n" . $ciphertext;
+    }
+
+    protected function encryptShort($text, $key_name)
+    {
         $iv = openssl_random_pseudo_bytes(16);
         $req = new EncryptCbcRequest(
             $text,
@@ -81,7 +103,7 @@ class Akm implements AkmInterface
         $inst = $resp->getInstance();
         $ciphertext = base64_encode($resp->getCipherText());
 
-        return $iv . '$' . $inst . '$' . $ciphertext;
+        return 'S$' . $iv . '$' . $inst . '$' . $ciphertext;
     }
 
     /**
@@ -92,6 +114,13 @@ class Akm implements AkmInterface
      * @returns string
      */
     public function decrypt($data)
+    {
+        return $data[0] === 'S'
+            ? $this->decryptShort(substr($data, 2))
+            : $this->decryptLong(substr($data, 2));
+    }
+
+    protected function decryptShort($data)
     {
         $parts = explode('$', $data);
         if (count($parts) !== 3) {
@@ -110,5 +139,20 @@ class Akm implements AkmInterface
         );
 
         return $this->send($req)->getPlainText();
+    }
+
+    protected function decryptLong($data)
+    {
+        $parts = explode("\n", $data);
+        if (count($parts) !== 2) {
+            throw new InvalidArgumentException('Malformed ciphertext');
+        }
+
+        $key_value = $this->decryptShort(substr($parts[0], 2));
+        $key = DefuseKey::loadFromAsciiSafeString($key_value, true);
+
+        $ciphertext = base64_decode($parts[1]);
+
+        return DefuseCrypto::decrypt($ciphertext, $key, true);
     }
 }

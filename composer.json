@@ -17,7 +17,9 @@
             "TownsendSecurity\\Test\\": "test/"
         }
     },
-    "require": {},
+    "require": {
+        "defuse/php-encryption": "^2.1"
+    },
     "require-dev": {
         "phpunit/phpunit": "^6.0",
         "squizlabs/php_codesniffer": "^2.8"

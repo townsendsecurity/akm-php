@@ -43,5 +43,15 @@ class EncryptCbcRequestTest extends AkmTestCase
             $text
         );
     }
+
+    public function testLongPlaintextString()
+    {
+        $text = str_repeat('a', EncryptCbcRequest::CHUNK_LEN * 3);
+        $ciphertext = $this->akm->encrypt($text, $this->keyname);
+        $this->assertEquals(
+            $this->akm->decrypt($ciphertext),
+            $text
+        );
+    }
 }
 
