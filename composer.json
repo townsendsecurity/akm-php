@@ -1,6 +1,7 @@
 {
     "name": "townsend/akm",
     "description": "Connection library for the Townsend AKM.",
+    "license": "MIT",
     "authors": [
         {
             "name": "Tynor Fujimoto",
